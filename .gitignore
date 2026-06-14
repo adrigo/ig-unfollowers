@@ -1,0 +1,11 @@
+# Dependency directories
+node_modules/
+
+# Build outputs and cache
+dist/
+
+# IDE / Editor configuration
+.vscode/
+
+# Agent-specific directories
+.agents/

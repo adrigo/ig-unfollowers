@@ -1,0 +1,13 @@
+{
+  "name": "instagram-unfollowers",
+  "version": "1.0.0",
+  "description": "Secure, lightweight browser utility to detect Instagram unfollowers.",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --minify --outfile=dist/index.min.js && node scripts/update-html.js",
+    "dev": "esbuild src/index.ts --bundle --outfile=dist/index.js --serve=3000"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.2",
+    "typescript": "^5.4.5"
+  }
+}

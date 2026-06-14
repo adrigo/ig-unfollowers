@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Unfollowers — Modern Browser Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0908;
+      --panel-bg: rgba(22, 20, 18, 0.65);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f7f1e8;
+      --text-muted: #ada79d;
+      --ig-orange: #f97316;
+      --ig-pink: #ec4899;
+      --ig-purple: #7c3aed;
+      --ig-gradient: linear-gradient(135deg, var(--ig-orange), var(--ig-pink), var(--ig-purple));
+      --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 1.5rem;
+      position: relative;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 5% 15%, rgba(249, 115, 22, 0.12), transparent 45rem),
+        radial-gradient(circle at 95% 10%, rgba(236, 72, 153, 0.1), transparent 40rem),
+        radial-gradient(circle at 50% 85%, rgba(124, 58, 237, 0.08), transparent 50rem);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+      z-index: 2;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    @media (min-width: 900px) {
+      .hero-section {
+        grid-template-columns: 1.2fr 1fr;
+      }
+    }
+
+    .hero-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+      padding: 0.4rem 1rem;
+      align-self: flex-start;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .logo-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--ig-gradient);
+      border-radius: 50%;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 40%, #c4bdb2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .buttons-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.95rem 1.8rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--ig-gradient);
+      color: #fff;
+      box-shadow: 0 8px 30px rgba(236, 72, 153, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(236, 72, 153, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* App UI Mockup */
+    .ui-mockup-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .ui-mockup-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 110%;
+      height: 110%;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 60%);
+      z-index: -1;
+      filter: blur(30px);
+    }
+
+    .ui-mockup {
+      width: 100%;
+      height: 400px;
+      background: rgba(20, 18, 16, 0.8);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .mockup-header {
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .mockup-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .mockup-logo-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--ig-gradient);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mockup-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .mockup-close {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: default;
+    }
+
+    .mockup-body {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    .mockup-sidebar {
+      width: 130px;
+      flex-shrink: 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0.85rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .mockup-sb-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .mockup-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .mockup-search-input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 0.35rem 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+    }
+
+    .mockup-action-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 0.4rem;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .mockup-action-btn.unfollow {
+      background: #ef4444;
+      border: none;
+    }
+
+    .mockup-stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      gap: 0.5rem;
+    }
+
+    .stat-val {
+      font-weight: 700;
+    }
+
+    .stat-val.red { color: #ef4444; }
+    .stat-val.green { color: #10b981; }
+
+    .mockup-content {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow-y: auto;
+    }
+
+    .mockup-content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding-bottom: 0.5rem;
+    }
+
+    .mockup-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .mockup-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      padding: 0.45rem 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .mockup-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .mockup-card-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mockup-checkbox {
+      width: 12px;
+      height: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .mockup-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #333;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .avatar-1 { background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80'); }
+    .avatar-2 { background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80'); }
+    .avatar-3 { background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80'); }
+
+    .mockup-names {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .mockup-username {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      white-space: nowrap;
+    }
+
+    .mockup-badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 0.05rem 0.25rem;
+      border-radius: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-private {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .badge-verified {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+    }
+
+    .mockup-unfollow-btn {
+      background: #ef4444;
+      border: none;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 5px;
+    }
+
+    /* Info Cards Section */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 600px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .feature-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(236, 72, 153, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ig-pink);
+    }
+
+    .feature-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .feature-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Warning Block */
+    .warning-banner {
+      background: rgba(249, 115, 22, 0.06);
+      border: 1px solid rgba(249, 115, 22, 0.15);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+
+    .warning-icon {
+      color: var(--ig-orange);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.15rem;
+    }
+
+    .warning-text h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffd082;
+      margin-bottom: 0.25rem;
+    }
+
+    .warning-text p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* How to Use Section */
+    .steps-section {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .steps-section h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .steps-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .steps-list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .step-node {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .step-num {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--ig-orange);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .step-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .step-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Code Block Section */
+    .code-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .code-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .badge-pill {
+      font-size: 0.7rem;
+      background: rgba(236, 72, 153, 0.15);
+      color: var(--ig-pink);
+      padding: 0.25rem 0.65rem;
+      border-radius: 99px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .code-container {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    pre {
+      background: #090807 !important;
+      padding: 1.25rem;
+      margin: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+      font-size: 0.8rem;
+      color: #f7f1e8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Toast Notification */
+    .toast-notification {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: rgba(16, 185, 129, 0.95);
+      color: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transform: translateY(100px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+      z-index: 99999;
+      font-size: 0.9rem;
+    }
+
+    .toast-notification.active {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .toast-icon {
+      font-size: 1.1rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 2rem;
+    }
+
+    footer a {
+      color: var(--ig-pink);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Hero / Intro Section -->
+    <div class="hero-section">
+      <div class="hero-text">
+        <h1>Instantly See Who Doesn't Follow You Back</h1>
+        <p class="hero-desc">
+          A secure, client-side browser overlay to analyze your followings and followers right on Instagram. No passwords, no logins, and no third-party servers required.
+        </p>
+
+        <div class="buttons-row">
+          <!-- Bookmarklet Link -->
+          <a id="bookmarklet-link" class="btn btn-primary" href="#">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M19 20h-1.828l-4.465-4.465a1 1 0 0 0-1.414 0L6.828 20H5V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3zM17 7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v10l2.879-2.879a3 3 0 0 1 4.242 0L17 17z" clip-rule="evenodd"/></svg>
+            Drag Bookmarklet to Bar
+          </a>
+          <!-- Copy Code Button -->
+          <button class="btn btn-secondary" onclick="copyToClipboard(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z"/><path d="M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1"/></g></svg>
+            <span>Copy Code</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ui-mockup-wrapper">
+        <div class="ui-mockup-glow"></div>
+        <div class="ui-mockup">
+          <div class="mockup-header">
+            <div class="mockup-title-group">
+              <div class="mockup-logo-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" style="color: #fff;"><path fill="currentColor" d="M14 14.252v2.09A6 6 0 0 0 6 22H4a8 8 0 0 1 10-7.749M12 13c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6m0-2c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4m7 6.586l2.121-2.121l1.415 1.414L20.414 19l2.121 2.121l-1.414 1.415L19 20.414l-2.121 2.121l-1.415-1.414L17.587 19l-2.121-2.121l1.414-1.415z"/></svg>
+              </div>
+              <span class="mockup-title">Instagram Unfollowers</span>
+            </div>
+            <div class="mockup-close">&times;</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-sidebar">
+              <div class="mockup-sb-section">
+                <span class="mockup-label">Search</span>
+                <div class="mockup-search-input">Search...</div>
+              </div>
+              <div class="mockup-sb-section">
+                <span class="mockup-label">Actions</span>
+                <div class="mockup-action-btn unfollow">Unfollow (0)</div>
+                <div class="mockup-action-btn" style="margin-top: 0.3rem; padding: 0.3rem;">Grid View</div>
+              </div>
+              <div class="mockup-sb-section">
+                <span class="mockup-label">Statistics</span>
+                <div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.2rem;">
+                  <div class="mockup-stat-row"><span>Non-followers</span><span class="stat-val red">248</span></div>
+                  <div class="mockup-stat-row"><span>Followers</span><span class="stat-val green">1,024</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="mockup-content">
+              <div class="mockup-content-header">
+                <span>Select All Visible</span>
+                <span>Showing 248 accounts</span>
+              </div>
+              <div class="mockup-list">
+                <div class="mockup-card">
+                  <div class="mockup-card-left">
+                    <div class="mockup-checkbox"></div>
+                    <div class="mockup-avatar avatar-1"></div>
+                    <div class="mockup-names">
+                      <span class="mockup-username">cyber_wanderer <span class="mockup-badge badge-private">🔒 Private</span></span>
+                      <span style="font-size: 0.65rem; color: var(--text-muted);">Julia Santos</span>
+                    </div>
+                  </div>
+                  <button class="mockup-unfollow-btn">Unfollow</button>
+                </div>
+                <div class="mockup-card">
+                  <div class="mockup-card-left">
+                    <div class="mockup-checkbox"></div>
+                    <div class="mockup-avatar avatar-2"></div>
+                    <div class="mockup-names">
+                      <span class="mockup-username">travel_pulse <span class="mockup-badge badge-verified">✓ Verified</span></span>
+                      <span style="font-size: 0.65rem; color: var(--text-muted);">Matheus Lima</span>
+                    </div>
+                  </div>
+                  <button class="mockup-unfollow-btn">Unfollow</button>
+                </div>
+                <div class="mockup-card">
+                  <div class="mockup-card-left">
+                    <div class="mockup-checkbox"></div>
+                    <div class="mockup-avatar avatar-3"></div>
+                    <div class="mockup-names">
+                      <span class="mockup-username">design_pixels</span>
+                      <span style="font-size: 0.65rem; color: var(--text-muted);">Lucas Souza</span>
+                    </div>
+                  </div>
+                  <button class="mockup-unfollow-btn">Unfollow</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024"><path fill="currentColor" d="M224 448a32 32 0 0 0-32 32v384a32 32 0 0 0 32 32h576a32 32 0 0 0 32-32V480a32 32 0 0 0-32-32zm0-64h576a96 96 0 0 1 96 96v384a96 96 0 0 1-96 96H224a96 96 0 0 1-96-96V480a96 96 0 0 1 96-96"/><path fill="currentColor" d="M512 544a32 32 0 0 1 32 32v192a32 32 0 1 1-64 0V576a32 32 0 0 1 32-32m192-160v-64a192 192 0 1 0-384 0v64zM512 64a256 256 0 0 1 256 256v128H256V320A256 256 0 0 1 512 64"/></svg>
+        </div>
+        <h3 class="feature-title">Privacy First</h3>
+        <p class="feature-desc">No login required. The utility queries the Instagram API inside your own active tab, keeping credentials fully secure.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M14 14.252v2.09A6 6 0 0 0 6 22H4a8 8 0 0 1 10-7.749M12 13c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6m0-2c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4m7 6.586l2.121-2.121l1.415 1.414L20.414 19l2.121 2.121l-1.414 1.415L19 20.414l-2.121 2.121l-1.415-1.414L17.587 19l-2.121-2.121l1.414-1.415z"/></svg>
+        </div>
+        <h3 class="feature-title">Sequential Bulk Unfollow</h3>
+        <p class="feature-desc">Select multiple accounts and unfollow them sequentially with configurable human-like delays to bypass Instagram's spam detection.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 6a8 3 0 1 0 16 0A8 3 0 1 0 4 6"/><path d="M4 6v6a8 3 0 0 0 16 0V6"/><path d="M4 12v6a8 3 0 0 0 16 0v-6"/></g></svg>
+        </div>
+        <h3 class="feature-title">Local Caching</h3>
+        <p class="feature-desc">Stores scanned data directly in your browser's local storage. Re-open the overlay to immediately analyze cached lists without re-scanning.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M3 7.4V3.6a.6.6 0 0 1 .6-.6h5.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6H3.6a.6.6 0 0 1-.6-.6Zm11 13v-3.8a.6.6 0 0 1 .6-.6h5.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-5.8a.6.6 0 0 1-.6-.6Zm0-8V3.6a.6.6 0 0 1 .6-.6h5.8a.6.6 0 0 1 .6.6v8.8a.6.6 0 0 1-.6.6h-5.8a.6.6 0 0 1-.6-.6Zm-11 8v-8.8a.6.6 0 0 1 .6-.6h5.8a.6.6 0 0 1 .6.6v8.8a.6.6 0 0 1-.6.6H3.6a.6.6 0 0 1-.6-.6Z"/></svg>
+        </div>
+        <h3 class="feature-title">Custom Layouts</h3>
+        <p class="feature-desc">Toggle between a high-fidelity detailed List View or a compact Grid View to browse unfollowers based on your preference.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2"><path stroke-linecap="round" d="M7 21a2 2 0 0 1-2-2V3h9l5 5v11a2 2 0 0 1-2 2z"/><path d="M13 3v6h6"/><path stroke-linecap="round" d="M9 13h6m-6 4h6"/></g></svg>
+        </div>
+        <h3 class="feature-title">Data Exports</h3>
+        <p class="feature-desc">Export current list results as a structured JSON file with one click, preserving a backup of accounts not following you back.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="currentColor"><path d="M12 14a1 1 0 0 1-1-1v-3a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1m-1.5 2.5a1.5 1.5 0 1 1 3 0a1.5 1.5 0 0 1-3 0"/><path d="M10.23 3.216c.75-1.425 2.79-1.425 3.54 0l8.343 15.852C22.814 20.4 21.85 22 20.343 22H3.657c-1.505 0-2.47-1.6-1.77-2.931zM20.344 20L12 4.147L3.656 20z"/></g></svg>
+        </div>
+        <h3 class="feature-title">Anti-Block Controls</h3>
+        <p class="feature-desc">Monitors HTTP status responses and instantly halts executions if Instagram issues a 429 rate limit to safeguard your account.</p>
+      </div>
+    </div>
+
+    <!-- How to Use / Steps -->
+    <div class="steps-section">
+      <h2>How to Run It</h2>
+      <div class="steps-list">
+        <div class="step-node">
+          <span class="step-num">Step 01</span>
+          <span class="step-title">Load Bookmarklet</span>
+          <p class="step-desc">Drag the <strong>Unfollowers Bookmarklet</strong> button to your browser's Bookmarks bar (press <code>Ctrl+Shift+B</code> or <code>Cmd+Shift+B</code> on Mac if hidden).</p>
+        </div>
+        <div class="step-node">
+          <span class="step-num">Step 02</span>
+          <span class="step-title">Open Instagram</span>
+          <p class="step-desc">Open a tab, go to <a href="https://www.instagram.com" target="_blank" style="color: var(--ig-pink); text-decoration: none; font-weight: 600;">instagram.com</a>, and ensure you are logged into your profile.</p>
+        </div>
+        <div class="step-node">
+          <span class="step-num">Step 03</span>
+          <span class="step-title">Inject Overlay</span>
+          <p class="step-desc">Click the bookmarklet link in your bookmarks bar. The custom overlay modal will immediately slide onto the page.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warnings Section -->
+    <div class="warning-banner">
+      <div class="warning-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="currentColor"><path d="M12 14a1 1 0 0 1-1-1v-3a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1m-1.5 2.5a1.5 1.5 0 1 1 3 0a1.5 1.5 0 0 1-3 0"/><path d="M10.23 3.216c.75-1.425 2.79-1.425 3.54 0l8.343 15.852C22.814 20.4 21.85 22 20.343 22H3.657c-1.505 0-2.47-1.6-1.77-2.931zM20.344 20L12 4.147L3.656 20z"/></g></svg>
+      </div>
+      <div class="warning-text">
+        <h3>Rate Limit Warning & Safe Use Guidelines</h3>
+        <p>
+          Executing API requests quickly may result in temporary blocks from Instagram. We recommend executing a scan no more than once every 10-15 minutes. During bulk unfollow operations, the script uses a 2-second rate-limiting delay, which automatically pauses if Instagram flags the requests. Avoid running multiple active sessions.
+        </p>
+      </div>
+    </div>
+
+    <!-- Console Warnings Note -->
+    <div class="warning-banner" style="border-color: rgba(124, 58, 237, 0.25); background: rgba(124, 58, 237, 0.05); margin-top: -2.5rem;">
+      <div class="warning-icon" style="color: var(--ig-purple);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0m9-3h.01"/><path d="M11 12h1v4h1"/></g></svg>
+      </div>  
+      <div class="warning-text">
+        <h3 style="color: #c084fc;">Console Warnings (Safely Ignore)</h3>
+        <p style="font-size: 0.88rem; opacity: 0.85; margin-top: 0.25rem;">
+          If you inspect your browser console on <code>instagram.com</code>, you might see pre-existing warning messages such as <code>"ignoring invalid endpoint URL '/security/coop_report/'"</code> or rejected Meta cookies (e.g. <code>"th_eu_pref"</code>). <strong>These warnings are generated natively by Instagram's own servers</strong> and will appear even before this utility is executed. They are completely normal and safe to ignore.
+        </p>
+      </div>
+    </div>
+
+    <!-- Code Block and Copy Panel -->
+    <div class="code-section">
+      <div class="code-header">
+        <span class="code-title">Self-Executing JavaScript Bundle</span>
+        <span class="badge-pill">Minified</span>
+      </div>
+      <div class="code-container">
+        <pre><code id="code-preview"></code></pre>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Created by <a href="https://adrigo.dev" target="_blank">adrigo</a>.</p>
+      <p>This utility is open-source and respects your privacy. No data is sent to external servers.</p>
+    </footer>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="toast-notification" id="success-toast">
+    <span class="toast-icon">✓</span>
+    <span>Script copied successfully! Ready to paste in Instagram.</span>
+  </div>
+
+  <script>
+    const codePreview = document.getElementById("code-preview");
+    const bookmarkletLink = document.getElementById("bookmarklet-link");
+    const toast = document.getElementById("success-toast");
+
+    // The build script replaces this variable content with the compiled bundle:
+    const instagramScript = "\"use strict\";(()=>{var G=`\n  #iu-overlay {\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100vw;\n    height: 100vh;\n    background: rgba(10, 9, 8, 0.75);\n    backdrop-filter: blur(12px);\n    -webkit-backdrop-filter: blur(12px);\n    z-index: 999999;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    color: #f7f1e8;\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    overscroll-behavior: contain;\n  }\n\n  .iu-card {\n    width: 95%;\n    max-width: 820px;\n    height: 85vh;\n    background: rgba(22, 20, 18, 0.85);\n    border: 1px solid rgba(247, 241, 232, 0.08);\n    border-radius: 20px;\n    display: flex;\n    flex-direction: column;\n    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);\n    overflow: hidden;\n    animation: iu-fade-in 0.3s ease-out;\n  }\n\n  @keyframes iu-fade-in {\n    from { opacity: 0; transform: scale(0.95); }\n    to { opacity: 1; transform: scale(1); }\n  }\n\n  .iu-header {\n    padding: 0.85rem 1.25rem;\n    border-bottom: 1px solid rgba(255, 255, 255, 0.06);\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    background: rgba(0, 0, 0, 0.2);\n  }\n\n  .iu-title-group {\n    display: flex;\n    align-items: center;\n    gap: 0.75rem;\n  }\n\n  .iu-logo {\n    width: 32px;\n    height: 32px;\n    background: linear-gradient(135deg, #f97316, #ec4899, #7c3aed);\n    border-radius: 8px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-weight: bold;\n    font-size: 1.1rem;\n    color: #fff;\n  }\n\n  .iu-title {\n    font-size: 1.15rem;\n    font-weight: 700;\n    letter-spacing: -0.02em;\n  }\n\n  .iu-close-btn {\n    background: transparent;\n    border: none;\n    color: #ada79d;\n    font-size: 1.5rem;\n    cursor: pointer;\n    line-height: 1;\n    padding: 0.25rem;\n    transition: color 0.2s;\n  }\n\n  .iu-close-btn:hover {\n    color: #fff;\n  }\n\n  .iu-body {\n    flex: 1;\n    padding: 1.25rem 1.5rem;\n    overflow: hidden;\n    display: flex;\n    flex-direction: column;\n    overscroll-behavior: contain;\n  }\n\n  /* Two-column layout elements */\n  .iu-layout-wrapper {\n    display: flex;\n    gap: 1.5rem;\n    height: 100%;\n    width: 100%;\n    box-sizing: border-box;\n    overflow: hidden;\n  }\n\n  .iu-sidebar {\n    width: 220px;\n    flex-shrink: 0;\n    display: flex;\n    flex-direction: column;\n    gap: 1rem;\n    border-right: 1px solid rgba(255, 255, 255, 0.06);\n    padding-right: 1.25rem;\n    overflow-y: auto;\n    height: 100%;\n    box-sizing: border-box;\n  }\n  \n  .iu-sidebar::-webkit-scrollbar {\n    width: 4px;\n  }\n  .iu-sidebar::-webkit-scrollbar-thumb {\n    background: rgba(255, 255, 255, 0.08);\n    border-radius: 2px;\n  }\n\n  .iu-sidebar-section {\n    border-bottom: 1px solid rgba(255, 255, 255, 0.05);\n    padding-bottom: 0.85rem;\n  }\n\n  .iu-stats-vertical {\n    display: flex;\n    flex-direction: column;\n    gap: 0.5rem;\n  }\n\n  .iu-stat-row {\n    display: flex;\n    justify-content: space-between;\n    font-size: 0.85rem;\n    color: #ada79d;\n    padding: 0.15rem 0;\n  }\n\n  .iu-content-area {\n    flex: 1;\n    display: flex;\n    flex-direction: column;\n    min-width: 0;\n    height: 100%;\n  }\n\n  @media (max-width: 650px) {\n    .iu-card {\n      height: 90vh;\n    }\n    .iu-body {\n      overflow-y: auto;\n    }\n    .iu-layout-wrapper {\n      flex-direction: column;\n      overflow-y: auto;\n      gap: 1rem;\n    }\n    .iu-sidebar {\n      width: 100%;\n      height: auto;\n      border-right: none;\n      padding-right: 0;\n      border-bottom: 1px solid rgba(255, 255, 255, 0.06);\n      padding-bottom: 1rem;\n      overflow-y: visible;\n    }\n    .iu-content-area {\n      height: auto;\n      overflow-y: visible;\n    }\n  }\n\n  /* Scanning State styles */\n  .iu-scanner-view {\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    justify-content: center;\n    height: 100%;\n    gap: 2rem;\n    text-align: center;\n  }\n\n  .iu-spinner {\n    width: 60px;\n    height: 60px;\n    border-radius: 50%;\n    background: conic-gradient(from 0deg, transparent 20%, #f97316, #ec4899, #7c3aed);\n    position: relative;\n    animation: iu-spin 0.8s linear infinite;\n  }\n\n  .iu-spinner::after {\n    content: '';\n    position: absolute;\n    top: 5px;\n    left: 5px;\n    right: 5px;\n    bottom: 5px;\n    background: #161412;\n    border-radius: 50%;\n  }\n\n  @keyframes iu-spin {\n    to { transform: rotate(360deg); }\n  }\n\n  .iu-progress-bar-container {\n    width: 100%;\n    max-width: 350px;\n    height: 6px;\n    background: rgba(255, 255, 255, 0.05);\n    border-radius: 99px;\n    overflow: hidden;\n  }\n\n  .iu-progress-bar {\n    height: 100%;\n    width: 0%;\n    background: linear-gradient(90deg, #f97316, #ec4899);\n    transition: width 0.2s ease;\n  }\n\n  /* List State styles */\n  .iu-controls-row {\n    display: flex;\n    gap: 0.75rem;\n    width: 100%;\n    flex-wrap: wrap;\n  }\n\n  .iu-search-input {\n    flex: 1;\n    min-width: 0;\n    background: rgba(0, 0, 0, 0.3);\n    border: 1px solid rgba(255, 255, 255, 0.08);\n    border-radius: 10px;\n    padding: 0.75rem 1rem;\n    color: #fff;\n    font-size: 0.9rem;\n    outline: none;\n    transition: border-color 0.2s;\n  }\n\n  .iu-search-input:focus {\n    border-color: #ec4899;\n    box-shadow: 0 0 10px rgba(236, 72, 153, 0.15);\n  }\n\n  .iu-btn-export {\n    background: rgba(255, 255, 255, 0.05);\n    border: 1px solid rgba(255, 255, 255, 0.08);\n    border-radius: 10px;\n    padding: 0.75rem 1.1rem;\n    color: #fff;\n    font-weight: 600;\n    font-size: 0.88rem;\n    cursor: pointer;\n    transition: background 0.2s, border-color 0.2s;\n    white-space: nowrap;\n    flex-shrink: 0;\n  }\n\n  .iu-btn-export:hover:not(:disabled) {\n    background: rgba(255, 255, 255, 0.1);\n  }\n\n  .iu-btn-export:disabled {\n    opacity: 0.4;\n    cursor: not-allowed;\n  }\n\n  .iu-filters-row {\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    gap: 1.25rem;\n    padding: 0.25rem 0.5rem;\n    flex-wrap: wrap;\n    font-size: 0.88rem;\n    color: #ada79d;\n    border-bottom: 1px solid rgba(255, 255, 255, 0.04);\n    padding-bottom: 1rem;\n  }\n\n  .iu-filter-label {\n    display: flex;\n    align-items: center;\n    gap: 0.45rem;\n    cursor: pointer;\n    user-select: none;\n    font-weight: 500;\n    transition: color 0.2s;\n  }\n\n  .iu-filter-label:hover {\n    color: #fff;\n  }\n\n  .iu-filter-label input[type=\"checkbox\"] {\n    cursor: pointer;\n    accent-color: #ec4899;\n    width: 15px;\n    height: 15px;\n  }\n\n  .iu-filter-label input[type=\"checkbox\"]:disabled {\n    cursor: not-allowed;\n  }\n\n  #iu-sort-select {\n    background: rgba(0, 0, 0, 0.3);\n    border: 1px solid rgba(255, 255, 255, 0.08);\n    color: #fff;\n    padding: 0.35rem 0.6rem;\n    border-radius: 8px;\n    font-size: 0.85rem;\n    outline: none;\n    cursor: pointer;\n    transition: border-color 0.2s, background-color 0.2s;\n  }\n\n  #iu-sort-select:hover {\n    border-color: rgba(236, 72, 153, 0.45);\n    background-color: rgba(0, 0, 0, 0.45);\n    box-shadow: 0 0 8px rgba(236, 72, 153, 0.08);\n  }\n\n  #iu-sort-select:focus {\n    border-color: #ec4899;\n    box-shadow: 0 0 10px rgba(236, 72, 153, 0.15);\n  }\n\n  .iu-summary-stats {\n    font-size: 0.9rem;\n    color: #ada79d;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n  }\n\n  .iu-stat-card {\n    flex: 1;\n    min-width: 90px;\n    background: rgba(255, 255, 255, 0.02);\n    border: 1px solid rgba(255, 255, 255, 0.04);\n    padding: 0.5rem;\n    border-radius: 8px;\n    text-align: center;\n    transition: background 0.2s, border-color 0.2s;\n  }\n\n  .iu-stat-card:hover {\n    background: rgba(255, 255, 255, 0.04);\n    border-color: rgba(255, 255, 255, 0.08);\n  }\n\n  .iu-list-container {\n    flex: 1;\n    overflow-y: auto;\n    display: flex;\n    flex-direction: column;\n    gap: 0.75rem;\n    padding-right: 0.25rem;\n    overscroll-behavior: contain;\n  }\n\n  .iu-list-container::-webkit-scrollbar {\n    width: 6px;\n  }\n  .iu-list-container::-webkit-scrollbar-thumb {\n    background: rgba(255, 255, 255, 0.1);\n    border-radius: 4px;\n  }\n\n  .iu-user-card {\n    background: rgba(255, 255, 255, 0.03);\n    border: 1px solid rgba(255, 255, 255, 0.04);\n    border-radius: 12px;\n    padding: 0.5rem 0.75rem;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    transition: border-color 0.2s;\n    position: relative;\n  }\n\n  .iu-user-card:hover {\n    border-color: rgba(236, 72, 153, 0.3);\n    background: rgba(255, 255, 255, 0.04);\n    box-shadow: 0 0 12px rgba(236, 72, 153, 0.08);\n  }\n\n  .iu-user-info {\n    display: flex;\n    align-items: center;\n    gap: 0.75rem;\n  }\n\n  .iu-user-checkbox {\n    cursor: pointer;\n    accent-color: #ec4899;\n    width: 16px;\n    height: 16px;\n    flex-shrink: 0;\n  }\n\n  .iu-user-checkbox:disabled {\n    cursor: not-allowed;\n  }\n\n  .iu-avatar {\n    width: 38px;\n    height: 38px;\n    border-radius: 50%;\n    object-fit: cover;\n    border: 1px solid rgba(255, 255, 255, 0.1);\n  }\n\n  .iu-names {\n    display: flex;\n    flex-direction: column;\n    gap: 0.15rem;\n  }\n\n  .iu-username,\n  .iu-username:link,\n  .iu-username:visited,\n  .iu-username:hover,\n  .iu-username:active {\n    font-weight: 700 !important;\n    color: #fff !important;\n    text-decoration: none !important;\n    font-size: 0.95rem !important;\n  }\n\n  .iu-username:hover {\n    text-decoration: underline !important;\n  }\n\n  .iu-fullname {\n    font-size: 0.8rem;\n    color: #ada79d;\n  }\n\n  .iu-badge {\n    font-size: 0.7rem;\n    padding: 0.15rem 0.4rem;\n    border-radius: 4px;\n    font-weight: 700;\n  }\n\n  .iu-badge-private {\n    background: rgba(239, 68, 68, 0.15);\n    color: #f87171;\n  }\n\n  .iu-badge-verified {\n    background: rgba(59, 130, 246, 0.15);\n    color: #60a5fa;\n  }\n\n  .iu-unfollow-btn {\n    background: #ef4444;\n    border: none;\n    color: #fff;\n    border-radius: 8px;\n    padding: 0.5rem 1rem;\n    font-weight: 600;\n    font-size: 0.85rem;\n    cursor: pointer;\n    transition: opacity 0.2s, background 0.2s;\n  }\n\n  .iu-unfollow-btn:hover:not(:disabled) {\n    background: #dc2626;\n  }\n\n  .iu-unfollow-btn:disabled {\n    opacity: 0.5;\n    cursor: not-allowed;\n  }\n\n  /* Grid Layout for Cards */\n  .iu-list-container.grid-view {\n    display: grid;\n    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));\n    gap: 0.75rem;\n  }\n\n  .iu-list-container.grid-view .iu-user-card {\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n    text-align: center;\n    padding: 1rem 0.75rem 0.85rem;\n    gap: 0.75rem;\n    min-height: 190px;\n  }\n\n  .iu-list-container.grid-view .iu-user-checkbox {\n    position: absolute;\n    top: 0.75rem;\n    left: 0.75rem;\n  }\n\n  .iu-list-container.grid-view .iu-user-info {\n    flex-direction: column;\n    align-items: center;\n    gap: 0.75rem;\n  }\n\n  .iu-list-container.grid-view .iu-names {\n    align-items: center;\n  }\n\n  .iu-list-container.grid-view .iu-names div {\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    gap: 0.25rem !important;\n  }\n\n  .iu-list-container.grid-view .iu-avatar {\n    width: 48px;\n    height: 48px;\n  }\n\n  .iu-list-container.grid-view .iu-unfollow-btn {\n    width: 100%;\n  }\n\n  .iu-sidebar-actions {\n    display: flex;\n    flex-direction: column;\n    gap: 0.5rem;\n  }\n\n  .iu-btn-group {\n    display: flex;\n    gap: 0.5rem;\n    width: 100%;\n  }\n\n  .iu-filter-list {\n    display: flex;\n    flex-direction: column;\n    gap: 0.6rem;\n  }\n\n  .iu-badge-follower {\n    background: rgba(16, 185, 129, 0.15);\n    color: #34d399;\n  }\n\n  .iu-content-header {\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    margin-bottom: 0.75rem;\n    padding: 0 0.25rem;\n    flex-shrink: 0;\n  }\n\n  #iu-bulk-progress-banner {\n    display: none;\n    background: rgba(239, 68, 68, 0.15);\n    border: 1px solid rgba(239, 68, 68, 0.25);\n    padding: 0.75rem 1rem;\n    border-radius: 12px;\n    align-items: center;\n    justify-content: space-between;\n    font-size: 0.9rem;\n    margin-bottom: 0.75rem;\n  }\n\n  .iu-stat-val {\n    font-weight: 700;\n  }\n  .iu-stat-val.non-followers {\n    color: #ef4444;\n  }\n  .iu-stat-val.followers {\n    color: #10b981;\n  }\n  .iu-stat-val.verified {\n    color: #3b82f6;\n  }\n  .iu-stat-val.private {\n    color: #ffd082;\n  }\n`;var O=d=>{let a=`; ${document.cookie}`.split(`; ${d}=`);return a.length===2?a.pop().split(\";\").shift():null},J=async(d,f,a)=>{let p=[],l=!0,E=\"\",h=0,m=0;for(;l;){if(a?.aborted)throw new DOMException(\"Scan aborted by user\",\"AbortError\");let y=JSON.stringify({id:d,include_reel:!1,fetch_mutual:!1,first:50,after:E||void 0}),c=`https://www.instagram.com/graphql/query/?query_hash=3dec7e2c57367ef3da3d987d89f9dbc8&variables=${encodeURIComponent(y)}`,u=await fetch(c,{signal:a});if(!u.ok)throw u.status===429?new Error(\"Rate limit exceeded (HTTP 429). Please wait a few minutes before scanning again.\"):new Error(`Failed to query Instagram API (Status ${u.status})`);let s=await u.json();if(s.errors&&s.errors.length>0)throw new Error(s.errors[0].message||\"Instagram API Error\");if(!s.data?.user?.edge_follow)throw new Error(\"Invalid API response structure. Please make sure you are logged in and try again.\");let i=s.data.user.edge_follow;h===0&&(h=i.count),m+=i.edges.length,f(m,h);for(let o of i.edges){let g=o.node;p.push({id:g.id,username:g.username,fullName:g.full_name||\"\",profilePicUrl:g.profile_pic_url,isPrivate:g.is_private,isVerified:g.is_verified,followsViewer:g.follows_viewer})}l=i.page_info.has_next_page,E=i.page_info.end_cursor,await new Promise(o=>setTimeout(o,50))}return p.sort((y,c)=>y.username.localeCompare(c.username)),p},N=async(d,f)=>{let a=await fetch(`https://www.instagram.com/web/friendships/${d}/unfollow/`,{method:\"POST\",headers:{\"content-type\":\"application/x-www-form-urlencoded\",\"x-csrftoken\":f},mode:\"cors\",credentials:\"include\"});return{ok:a.ok,status:a.status}},Y=d=>{try{let f=localStorage.getItem(`iu_cache_${d}`);return f?JSON.parse(f):null}catch{return null}},z=(d,f)=>{try{let a={timestamp:Date.now(),users:f};localStorage.setItem(`iu_cache_${d}`,JSON.stringify(a))}catch(a){console.error(\"Failed to save followings cache:\",a)}};function j(d,f,a,p){let l=[...f],E=!0,h=!1,m=!0,y=!1,c=!1,u=!1,s=new Set;d.innerHTML=`\n    <div class=\"iu-layout-wrapper\">\n      <div class=\"iu-sidebar\">\n        <!-- Search bar -->\n        <div class=\"iu-sidebar-section\">\n          <div style=\"font-weight: bold; color: #fff; font-size: 0.82rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;\">Search:</div>\n          <input type=\"text\" class=\"iu-search-input\" id=\"iu-search\" placeholder=\"Username or name...\" style=\"width: 100%; box-sizing: border-box;\" />\n        </div>\n        \n        <!-- Actions Group -->\n        <div class=\"iu-sidebar-section iu-sidebar-actions\">\n          <button class=\"iu-btn-export\" id=\"iu-bulk-unfollow-btn\" style=\"width: 100%; background: #ef4444; border-color: rgba(239, 68, 68, 0.4); text-align: center;\" disabled>Unfollow (0)</button>\n          <div class=\"iu-btn-group\">\n            <button class=\"iu-btn-export\" id=\"iu-layout-btn\" style=\"flex: 1; text-align: center;\">Grid View</button>\n            <button class=\"iu-btn-export\" id=\"iu-export-btn\" style=\"flex: 1; text-align: center;\">Export</button>\n          </div>\n        </div>\n\n        <!-- Sort Select -->\n        <div class=\"iu-sidebar-section\">\n          <div style=\"font-weight: bold; color: #fff; font-size: 0.82rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;\">Sort By:</div>\n          <select id=\"iu-sort-select\" style=\"width: 100%; box-sizing: border-box;\">\n            <option value=\"name-asc\">A-Z (Username)</option>\n            <option value=\"name-desc\">Z-A (Username)</option>\n            <option value=\"private-first\">\\u{1F512} Private First</option>\n            <option value=\"verified-first\">\\u2713 Verified First</option>\n          </select>\n        </div>\n\n        <!-- Filter Checkboxes -->\n        <div class=\"iu-sidebar-section\">\n          <div style=\"font-weight: bold; color: #fff; font-size: 0.82rem; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;\">Filters:</div>\n          <div class=\"iu-filter-list\">\n            <label class=\"iu-filter-label\">\n              <input type=\"checkbox\" id=\"iu-filter-nonfollowers\" ${E?\"checked\":\"\"} />\n              Non-followers\n            </label>\n            <label class=\"iu-filter-label\">\n              <input type=\"checkbox\" id=\"iu-filter-followers\" ${h?\"checked\":\"\"} />\n              Followers\n            </label>\n            <label class=\"iu-filter-label\">\n              <input type=\"checkbox\" id=\"iu-filter-verified\" ${m?\"checked\":\"\"} />\n              Show Verified\n            </label>\n          </div>\n        </div>\n\n        <!-- Vertical Stats Dashboard -->\n        <div class=\"iu-sidebar-section\" style=\"border-bottom: none; padding-bottom: 0;\">\n          <div style=\"font-weight: bold; color: #fff; font-size: 0.82rem; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;\">Statistics:</div>\n          <div class=\"iu-stats-vertical\">\n            <div class=\"iu-stat-row\">\n              <span>Non-followers</span>\n              <span id=\"stat-nonfollowers\" class=\"iu-stat-val non-followers\">0</span>\n            </div>\n            <div class=\"iu-stat-row\">\n              <span>Followers</span>\n              <span id=\"stat-followers\" class=\"iu-stat-val followers\">0</span>\n            </div>\n            <div class=\"iu-stat-row\">\n              <span>Verified</span>\n              <span id=\"stat-verified\" class=\"iu-stat-val verified\">0</span>\n            </div>\n            <div class=\"iu-stat-row\">\n              <span>Private</span>\n              <span id=\"stat-private\" class=\"iu-stat-val private\">0</span>\n            </div>\n          </div>\n        </div>\n      </div>\n\n      <div class=\"iu-content-area\">\n        <!-- Progress banner for bulk unfollow operations -->\n        <div id=\"iu-bulk-progress-banner\">\n          <span id=\"iu-bulk-progress-text\" style=\"font-weight: 600;\">Unfollowing: 0/0</span>\n          <div class=\"iu-btn-group\" style=\"width: auto;\">\n            <button id=\"iu-bulk-pause-btn\" class=\"iu-btn-export\" style=\"padding: 0.35rem 0.75rem; font-size: 0.8rem; background: rgba(255, 255, 255, 0.08); border-radius: 6px;\">Pause</button>\n            <button id=\"iu-bulk-cancel-btn\" class=\"iu-btn-export\" style=\"padding: 0.35rem 0.75rem; font-size: 0.8rem; background: #ef4444; border: none; border-radius: 6px;\">Cancel</button>\n          </div>\n        </div>\n\n        <!-- Selection controller & counter -->\n        <div class=\"iu-content-header\">\n          <label class=\"iu-filter-label\">\n            <input type=\"checkbox\" id=\"iu-select-all\" />\n            <span style=\"font-weight: bold; color: #fff; font-size: 0.88rem;\">Select All Visible</span>\n          </label>\n          <span id=\"iu-count-text\" style=\"font-size: 0.85rem; color: #ada79d;\">Loading list...</span>\n        </div>\n\n        <!-- The scrollable list view -->\n        <div class=\"iu-list-container\" id=\"iu-list\">\n          <!-- Rendered dynamically -->\n        </div>\n      </div>\n    </div>\n  `;let i=document.getElementById(\"iu-list\"),o=document.getElementById(\"iu-search\"),g=document.getElementById(\"iu-count-text\"),T=document.getElementById(\"iu-export-btn\"),S=document.getElementById(\"iu-layout-btn\"),B=document.getElementById(\"iu-bulk-unfollow-btn\"),I=document.getElementById(\"iu-filter-nonfollowers\"),U=document.getElementById(\"iu-filter-followers\"),A=document.getElementById(\"iu-filter-verified\"),$=document.getElementById(\"iu-select-all\"),M=document.getElementById(\"iu-sort-select\"),D=document.getElementById(\"iu-bulk-progress-banner\"),Z=document.getElementById(\"iu-bulk-progress-text\"),k=document.getElementById(\"iu-bulk-pause-btn\"),K=document.getElementById(\"iu-bulk-cancel-btn\"),w=[],F=()=>{let r=l.filter(x=>!x.followsViewer).length,t=l.filter(x=>x.followsViewer).length,e=l.filter(x=>x.isVerified).length,n=l.filter(x=>x.isPrivate).length;document.getElementById(\"stat-nonfollowers\").textContent=String(r),document.getElementById(\"stat-followers\").textContent=String(t),document.getElementById(\"stat-verified\").textContent=String(e),document.getElementById(\"stat-private\").textContent=String(n)},H=()=>{B.disabled=s.size===0,B.textContent=`Unfollow (${s.size})`},q=()=>{let r=w.length>0&&w.every(t=>s.has(t.id));$.checked=r},L=()=>{let r=o.value.toLowerCase().trim();w=l.filter(e=>!(!(e.username.toLowerCase().includes(r)||e.fullName.toLowerCase().includes(r))||!(E&&!e.followsViewer||h&&e.followsViewer)||!(!e.isVerified||m)));let t=M.value;if(t===\"name-asc\"?w.sort((e,n)=>e.username.localeCompare(n.username)):t===\"name-desc\"?w.sort((e,n)=>n.username.localeCompare(e.username)):t===\"private-first\"?w.sort((e,n)=>e.isPrivate&&!n.isPrivate?-1:!e.isPrivate&&n.isPrivate?1:e.username.localeCompare(n.username)):t===\"verified-first\"&&w.sort((e,n)=>e.isVerified&&!n.isVerified?-1:!e.isVerified&&n.isVerified?1:e.username.localeCompare(n.username)),g.textContent=`Showing ${w.length} of ${l.length} followed accounts.`,w.length===0){i.innerHTML=`\n        <div style=\"text-align: center; color: #ada79d; padding: 3rem 0;\">\n          No users match your criteria.\n        </div>\n      `;return}i.innerHTML=w.map(e=>`\n      <div class=\"iu-user-card\" id=\"card-${e.id}\">\n        <div class=\"iu-user-info\">\n          <input type=\"checkbox\" class=\"iu-user-checkbox\" data-id=\"${e.id}\" ${s.has(e.id)?\"checked\":\"\"} />\n          <img class=\"iu-avatar\" src=\"${e.profilePicUrl}\" alt=\"${e.username}\" />\n          <div class=\"iu-names\">\n            <div>\n              <a class=\"iu-username\" href=\"https://www.instagram.com/${e.username}/\" target=\"_blank\">${e.username}</a>\n              ${e.isVerified?'<span class=\"iu-badge iu-badge-verified\">\\u2713 Verified</span>':\"\"}\n              ${e.isPrivate?'<span class=\"iu-badge iu-badge-private\">\\u{1F512} Private</span>':\"\"}\n              ${e.followsViewer?'<span class=\"iu-badge iu-badge-follower\">Follows you</span>':\"\"}\n            </div>\n            <span class=\"iu-fullname\">${e.fullName}</span>\n          </div>\n        </div>\n        <button class=\"iu-unfollow-btn\" data-id=\"${e.id}\">Unfollow</button>\n      </div>\n    `).join(\"\"),q()},Q=async(r,t)=>{t.disabled=!0,t.textContent=\"...\";try{let e=await N(r.id,a);if(e.ok)t.textContent=\"Unfollowed\",t.style.background=\"rgba(255,255,255,0.05)\",t.style.color=\"#ada79d\",l=l.filter(n=>n.id!==r.id),s.delete(r.id),z(p,l),setTimeout(()=>{L(),F(),H()},800);else throw e.status===429&&alert(\"Instagram rate limit detected (HTTP 429). Please wait a few minutes before trying to unfollow again.\"),new Error(\"API Error\")}catch(e){t.disabled=!1,t.textContent=\"Unfollow\",(!(e instanceof Error)||e.message!==\"API Error\")&&alert(`Failed to unfollow @${r.username}. Try again later.`)}};return i.addEventListener(\"change\",r=>{let t=r.target;if(t.classList.contains(\"iu-user-checkbox\")){let e=t.getAttribute(\"data-id\");t.checked?s.add(e):s.delete(e),H(),q()}}),i.addEventListener(\"click\",async r=>{let t=r.target;if(t.classList.contains(\"iu-unfollow-btn\")){let e=t.getAttribute(\"data-id\"),n=l.find(x=>x.id===e);n&&confirm(`Are you sure you want to unfollow @${n.username}?`)&&await Q(n,t)}}),$.addEventListener(\"change\",()=>{let r=$.checked;w.forEach(t=>{r?s.add(t.id):s.delete(t.id)}),i.querySelectorAll(\".iu-user-checkbox\").forEach(t=>{let e=t.getAttribute(\"data-id\");t.checked=s.has(e)}),H()}),k.addEventListener(\"click\",()=>{c=!c,k.textContent=c?\"Resume\":\"Pause\",k.style.background=c?\"linear-gradient(135deg, #f97316, #ec4899, #7c3aed)\":\"rgba(255, 255, 255, 0.08)\",k.style.color=\"#fff\"}),K.addEventListener(\"click\",()=>{u=!0}),B.addEventListener(\"click\",async()=>{let r=Array.from(s);if(r.length===0||!confirm(`Are you sure you want to unfollow ${r.length} selected accounts?\nThis will process them sequentially with a safe 2-second delay.`))return;let t=v=>(v.preventDefault(),v.returnValue=\"\",\"\");window.addEventListener(\"beforeunload\",t),c=!1,u=!1,k.textContent=\"Pause\",k.style.background=\"rgba(255, 255, 255, 0.08)\",k.style.color=\"#fff\",D.style.display=\"flex\",B.disabled=!0,$.disabled=!0,o.disabled=!0,I.disabled=!0,U.disabled=!0,A.disabled=!0,S.disabled=!0,T.disabled=!0,M.disabled=!0,i.querySelectorAll(\".iu-user-checkbox\").forEach(v=>{v.disabled=!0});let e=0,n=0;try{for(let v=0;v<r.length&&!u;v++){for(;c&&!u;)await new Promise(C=>setTimeout(C,250));if(u)break;let P=r[v],R=l.find(C=>C.id===P);if(!R)continue;Z.textContent=`Unfollowing: ${v+1} / ${r.length} (@${R.username})`;let b=i.querySelector(`.iu-unfollow-btn[data-id=\"${P}\"]`);b&&(b.disabled=!0,b.textContent=\"...\");try{let C=await N(P,a);if(C.ok)e++,l=l.filter(V=>V.id!==P),s.delete(P),b&&(b.textContent=\"Unfollowed\",b.style.background=\"rgba(255,255,255,0.05)\",b.style.color=\"#ada79d\");else{if(C.status===429){c=!0,k.textContent=\"Resume\",k.style.background=\"linear-gradient(135deg, #f97316, #ec4899, #7c3aed)\",k.style.color=\"#fff\",b&&(b.disabled=!1,b.textContent=\"Unfollow\"),alert(\"Instagram rate limit detected (HTTP 429). The bulk unfollow process has been automatically paused. Please wait a few minutes before resuming to avoid account restrictions.\"),v--;continue}throw new Error(\"API Fail\")}}catch{n++,b&&(b.disabled=!1,b.textContent=\"Failed\")}if(z(p,l),F(),v<r.length-1&&!u){let C=2e3+Math.random()*1500,V=0;for(;V<C&&!u;){for(;c&&!u;)await new Promise(_=>setTimeout(_,250));await new Promise(_=>setTimeout(_,250)),V+=250}}}}finally{window.removeEventListener(\"beforeunload\",t)}D.style.display=\"none\",$.disabled=!1,o.disabled=!1,I.disabled=!1,U.disabled=!1,A.disabled=!1,S.disabled=!1,T.disabled=!1,M.disabled=!1,alert(`${u?\"Bulk unfollow cancelled.\":\"Bulk unfollow complete.\"}\nSuccessfully unfollowed: ${e}\nFailed: ${n}`),L(),F(),H()}),I.addEventListener(\"change\",()=>{E=I.checked,L()}),U.addEventListener(\"change\",()=>{h=U.checked,L()}),A.addEventListener(\"change\",()=>{m=A.checked,L()}),M.addEventListener(\"change\",()=>{L()}),S.addEventListener(\"click\",()=>{y=!y,S.textContent=y?\"List View\":\"Grid View\",i.classList.toggle(\"grid-view\",y)}),o.addEventListener(\"input\",L),T.addEventListener(\"click\",()=>{let r=\"data:text/json;charset=utf-8,\"+encodeURIComponent(JSON.stringify(w,null,2)),t=document.createElement(\"a\");t.setAttribute(\"href\",r),t.setAttribute(\"download\",\"instagram_filtered_unfollowers.json\"),document.body.appendChild(t),t.click(),t.remove()}),L(),F(),{cancelBulk:()=>{u=!0}}}(async()=>{if(location.hostname!==\"www.instagram.com\"){alert(\"This script must be executed on www.instagram.com!\");return}let d=O(\"ds_user_id\"),f=O(\"csrftoken\");if(!d){alert(\"Please make sure you are logged in to Instagram on this tab first.\");return}let a=null,p=null,l=document.getElementById(\"iu-overlay\"),E=document.getElementById(\"iu-styles\");l&&l.remove(),E&&E.remove();let h=document.createElement(\"style\");h.id=\"iu-styles\",h.textContent=G,document.head.appendChild(h);let m=document.createElement(\"div\");m.id=\"iu-overlay\",m.innerHTML=`\n    <div class=\"iu-card\">\n      <div class=\"iu-header\">\n        <div class=\"iu-title-group\">\n          <div class=\"iu-logo\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" style=\"color: #fff;\"><path fill=\"currentColor\" d=\"M14 14.252v2.09A6 6 0 0 0 6 22H4a8 8 0 0 1 10-7.749M12 13c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6m0-2c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4m7 6.586l2.121-2.121l1.415 1.414L20.414 19l2.121 2.121l-1.414 1.415L19 20.414l-2.121 2.121l-1.415-1.414L17.587 19l-2.121-2.121l1.414-1.415z\"/></svg>\n          </div>\n          <span class=\"iu-title\">Instagram Unfollowers</span>\n        </div>\n        <button class=\"iu-close-btn\" id=\"iu-close-btn\">&times;</button>\n      </div>\n      <div class=\"iu-body\" id=\"iu-body\">\n        <div class=\"iu-scanner-view\">\n          <div class=\"iu-spinner\"></div>\n          <div>\n            <h3 style=\"margin-bottom: 0.5rem; font-weight: 600;\">Analyzing your account...</h3>\n            <p style=\"color: #ada79d; font-size: 0.9rem;\" id=\"iu-scan-status\">Preparing scanner...</p>\n          </div>\n          <div class=\"iu-progress-bar-container\">\n            <div class=\"iu-progress-bar\" id=\"iu-progress-bar\"></div>\n          </div>\n        </div>\n      </div>\n    </div>\n  `,document.body.appendChild(m),m.addEventListener(\"wheel\",i=>{let o=m.querySelector(\".iu-card\");o&&!o.contains(i.target)&&i.preventDefault()},{passive:!1}),m.addEventListener(\"touchmove\",i=>{let o=m.querySelector(\".iu-card\");o&&!o.contains(i.target)&&i.preventDefault()},{passive:!1}),document.body.dataset.iuOriginalOverflow===void 0&&(document.body.dataset.iuOriginalOverflow=document.body.style.overflow||\"\"),document.documentElement.dataset.iuOriginalOverflow===void 0&&(document.documentElement.dataset.iuOriginalOverflow=document.documentElement.style.overflow||\"\"),document.body.style.overflow=\"hidden\",document.documentElement.style.overflow=\"hidden\";let y=()=>{a&&(a.abort(),a=null),p&&(p.cancelBulk(),p=null),m.remove(),h.remove(),document.body.dataset.iuOriginalOverflow!==void 0&&(document.body.style.overflow=document.body.dataset.iuOriginalOverflow,delete document.body.dataset.iuOriginalOverflow),document.documentElement.dataset.iuOriginalOverflow!==void 0&&(document.documentElement.style.overflow=document.documentElement.dataset.iuOriginalOverflow,delete document.documentElement.dataset.iuOriginalOverflow)};document.getElementById(\"iu-close-btn\").addEventListener(\"click\",y);let c=document.getElementById(\"iu-body\"),u=async()=>{a&&a.abort(),a=new AbortController;let i=a.signal;try{c.innerHTML=`\n        <div class=\"iu-scanner-view\">\n          <div class=\"iu-spinner\"></div>\n          <div>\n            <h3 style=\"margin-bottom: 0.5rem; font-weight: 600;\">Analyzing your account...</h3>\n            <p style=\"color: #ada79d; font-size: 0.9rem;\" id=\"iu-scan-status\">Preparing scanner...</p>\n          </div>\n          <div class=\"iu-progress-bar-container\">\n            <div class=\"iu-progress-bar\" id=\"iu-progress-bar\"></div>\n          </div>\n        </div>\n      `;let o=document.getElementById(\"iu-scan-status\"),g=document.getElementById(\"iu-progress-bar\"),T=await J(d,(S,B)=>{let I=Math.round(S/B*100);g.style.width=`${I}%`,o.textContent=`Scanned ${S} of ${B} followings (${I}%)...`},i);z(d,T),p=j(c,T,f||\"\",d)}catch(o){if(o instanceof DOMException&&o.name===\"AbortError\"){console.log(\"Scan successfully aborted.\");return}console.error(\"Scan Error:\",o);let g=o instanceof Error?o.message:\"An error occurred while loading followings from Instagram.\";c.innerHTML=`\n        <div style=\"text-align: center; margin: auto; padding: 2rem;\">\n          <span style=\"font-size: 3rem;\">\\u26A0\\uFE0F</span>\n          <h3 style=\"margin: 1rem 0; color: #f87171;\">Scan Failed</h3>\n          <p style=\"color: #ada79d; margin-bottom: 1.5rem; line-height: 1.5; max-width: 320px; margin-left: auto; margin-right: auto;\">${g}</p>\n          <button id=\"iu-reload-btn\" class=\"iu-btn-export\" style=\"background: linear-gradient(135deg, #f97316, #ec4899, #7c3aed); color: #fff; border: none;\">Reload Page</button>\n        </div>\n      `,document.getElementById(\"iu-reload-btn\")?.addEventListener(\"click\",()=>{location.reload()})}},s=Y(d);if(s){let i=Math.round((Date.now()-s.timestamp)/6e4),o=i<1?\"just now\":i===1?\"1 minute ago\":`${i} minutes ago`;c.innerHTML=`\n      <div style=\"text-align: center; margin: auto; padding: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; align-items: center; justify-content: center; height: 100%;\">\n        <span style=\"font-size: 3rem;\">\\u{1F4BE}</span>\n        <div>\n          <h3 style=\"margin-bottom: 0.5rem; font-weight: 600; font-size: 1.3rem;\">Found Cached Data</h3>\n          <p style=\"color: #ada79d; font-size: 0.9rem; line-height: 1.5; max-width: 380px;\">\n            A cached list of <strong>${s.users.length} users</strong> was found (loaded ${o}).\n          </p>\n        </div>\n        <div style=\"display: flex; gap: 1rem; width: 100%; max-width: 350px;\">\n          <button id=\"iu-use-cache-btn\" class=\"iu-btn-export\" style=\"flex: 1; background: linear-gradient(135deg, #f97316, #ec4899, #7c3aed); color: #fff; border: none; font-weight: 700; height: 42px; border-radius: 10px;\">Use Cache</button>\n          <button id=\"iu-scan-fresh-btn\" class=\"iu-btn-export\" style=\"flex: 1; height: 42px; border-radius: 10px;\">Scan Fresh</button>\n        </div>\n      </div>\n    `,document.getElementById(\"iu-use-cache-btn\").addEventListener(\"click\",()=>{p=j(c,s.users,f||\"\",d)}),document.getElementById(\"iu-scan-fresh-btn\").addEventListener(\"click\",()=>{u()})}else u()})();})();\n";//__END_OF_SCRIPT__
+
+    codePreview.innerText = instagramScript;
+    bookmarkletLink.href = "javascript:" + encodeURIComponent(instagramScript);
+
+    function copyToClipboard(buttonEl) {
+      navigator.clipboard.writeText(instagramScript);
+      
+      // Visual feedback on the button
+      const originalHtml = buttonEl.innerHTML;
+      buttonEl.style.borderColor = 'var(--ig-pink)';
+      buttonEl.style.background = 'rgba(236, 72, 153, 0.05)';
+      buttonEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ig-pink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <span style="color: var(--ig-pink)">Copied!</span>`;
+
+      // Show toast
+      toast.classList.add("active");
+
+      setTimeout(() => {
+        buttonEl.innerHTML = originalHtml;
+        buttonEl.style.borderColor = '';
+        buttonEl.style.background = '';
+        toast.classList.remove("active");
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>

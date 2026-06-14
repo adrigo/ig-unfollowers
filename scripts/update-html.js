@@ -1,0 +1,35 @@
+const fs = require('fs');
+const path = require('path');
+
+const indexPath = path.join(__dirname, '../public/index.html');
+const minifiedPath = path.join(__dirname, '../dist/index.min.js');
+
+const START_MARKER = 'const instagramScript = "';
+const END_MARKER = '";//__END_OF_SCRIPT__';
+
+try {
+  if (!fs.existsSync(minifiedPath)) {
+    throw new Error('Minified build output not found. Run "npm run build" first.');
+  }
+
+  let minifiedCode = fs.readFileSync(minifiedPath, 'utf8');
+  let indexHtml = fs.readFileSync(indexPath, 'utf8');
+
+  // Safely escape the code for insertion into a double-quoted JavaScript string literal
+  const escapedCode = JSON.stringify(minifiedCode).slice(1, -1);
+
+  const startIndex = indexHtml.indexOf(START_MARKER) + START_MARKER.length;
+  const endIndex = indexHtml.indexOf(END_MARKER);
+
+  if (startIndex === -1 || endIndex === -1) {
+    throw new Error('Markers for script injection not found in index.html');
+  }
+
+  const updatedHtml = indexHtml.substring(0, startIndex) + escapedCode + indexHtml.substring(endIndex);
+  fs.writeFileSync(indexPath, updatedHtml, 'utf8');
+
+  console.log('Successfully injected script bundle into index.html!');
+} catch (err) {
+  console.error('Error during build HTML update:', err.message);
+  process.exit(1);
+}
