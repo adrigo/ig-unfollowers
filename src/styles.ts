@@ -157,12 +157,11 @@ export const CSS_STYLES = `
       height: 90vh;
     }
     .iu-body {
-      overflow-y: auto;
+      padding: 1rem;
     }
     .iu-layout-wrapper {
       flex-direction: column;
-      overflow-y: auto;
-      gap: 1rem;
+      gap: 0.75rem;
     }
     .iu-sidebar {
       width: 100%;
@@ -170,12 +169,29 @@ export const CSS_STYLES = `
       border-right: none;
       padding-right: 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding-bottom: 1rem;
+      padding-bottom: 0.75rem;
       overflow-y: visible;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .iu-sidebar-section {
+      flex: 1 1 calc(50% - 0.375rem);
+      min-width: 140px;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .iu-sidebar-section:first-child {
+      flex: 1 1 100%;
+    }
+    .iu-sidebar-section:last-child {
+      border-bottom: none;
     }
     .iu-content-area {
       height: auto;
-      overflow-y: visible;
+      flex: 1;
+      min-height: 0;
     }
   }
 
