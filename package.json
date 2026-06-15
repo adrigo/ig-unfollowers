@@ -1,5 +1,5 @@
 {
-  "name": "instagram-unfollowers",
+  "name": "ig-unfollowers",
   "version": "1.0.0",
   "description": "Secure, lightweight browser utility to detect Instagram unfollowers.",
   "scripts": {
