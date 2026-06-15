@@ -45,6 +45,9 @@ This page features a modern glassmorphic look, including a CSS-only visual mocku
 ### 3. Run on Instagram
 Once you open `public/index.html` in your browser:
 
+> [!IMPORTANT]
+> **Mobile Browser Support:** Currently, we have not found a reliable way to execute this utility on mobile devices (due to mobile browser sandbox restrictions on `javascript:` URL execution and Instagram's strict Content Security Policy). We are actively researching a solution. For now, please use a desktop browser.
+
 #### Option A: Bookmarklet (Recommended)
 1. **Drag** the **Unfollowers Bookmarklet** button to your browser's Bookmarks Bar (press `Ctrl+Shift+B` or `Cmd+Shift+B` on Mac if hidden).
 2. Go to [instagram.com](https://www.instagram.com) and log into your account.
